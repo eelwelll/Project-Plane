@@ -7,7 +7,7 @@ import random
 from itertools import islice
 import math
 pygame.display.set_caption("project plane")
-projecticon=pygame.image.load("Planes/F22/F22-Facing-Forward.png")
+projecticon=pygame.image.load("D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/ Planes/F22/F22-Facing-Forward.png")
 pygame.display.set_icon(projecticon)
 replitbad=True
 timer_m=0
@@ -24,7 +24,7 @@ highscore=0
 experience=1
 
 accel=1
-settingspreference=open("settings-containing.csv","r").read().splitlines()
+settingspreference=open("D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/settings-containing.csv","r").read().splitlines()
 movement=[[],[],[],[]]
 skip=False
 for line,text in enumerate(settingspreference):
@@ -81,7 +81,7 @@ cloudsonscreen=[]
 
 class propeller_dispersion:
     def __init__(self,xx,yy):
-        self.frame=pygame.image.load("prop/propeller-0.png")
+        self.frame=pygame.image.load("D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/prop/propeller-0.png")
         self.rect=self.frame.get_rect()
         self.frameon=0
         self.rect.center=xx,yy
@@ -90,7 +90,7 @@ class propeller_dispersion:
     def image_get(self):
         if tick%6==0:
             self.frameon=self.frameon+1 if self.frameon+1<9 else 0
-        self.frame=pygame.image.load(f"prop/propeller-{self.frameon}.png")
+        self.frame=pygame.image.load(f"D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/prop/propeller-{self.frameon}.png")
         self.frame=pygame.transform.scale_by(self.frame,4)
         screen.blit(self.frame,(self.rect.x,self.rect.y))
 
@@ -223,7 +223,7 @@ class bullet(pygame.sprite.Sprite):
         if aim:
             self.selected="aim"
 
-        self.bullet_image=pygame.image.load("Bullet_Sprite/Bullet.png") # the bullet
+        self.bullet_image=pygame.image.load("D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/Bullet_Sprite/Bullet.png") # the bullet
 
         self.bulletspawnx,self.bulletspawny=x,y # where the bullet spawns
         self.vertical=0
@@ -242,16 +242,16 @@ class bullet(pygame.sprite.Sprite):
         if not boss:
             if facing == 270:
                 self.diagonal=-1
-            self.bullet_image=pygame.image.load(f"Bullet_Sprite/{self.selected}-Facing-Left.png")
+            self.bullet_image=pygame.image.load(f"D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/Bullet_Sprite/{self.selected}-Facing-Left.png")
             if facing == -270:
                 self.diagonal=1
-                self.bullet_image=pygame.image.load(f"Bullet_Sprite/{self.selected}-Facing-Right.png")
+                self.bullet_image=pygame.image.load(f"D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/Bullet_Sprite/{self.selected}-Facing-Right.png")
             if facing==360:
                 self.vertical=-1
-                self.bullet_image=pygame.image.load(f"Bullet_Sprite/{self.selected}.png")
+                self.bullet_image=pygame.image.load(f"D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/Bullet_Sprite/{self.selected}.png")
             if facing == -180:
                 self.vertical=1
-                self.bullet_image=pygame.image.load(f"Bullet_Sprite/{self.selected}-Facing-Down.png")
+                self.bullet_image=pygame.image.load(f"D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/Bullet_Sprite/{self.selected}-Facing-Down.png")
         else:
             '''This works for getting the angle from the two points, use this equation if wanting to give the plane full 360 movement'''
             self.degreeofbullet=math.degrees(math.atan2(firstplane.rect.centery-self.rect.centery,firstplane.rect.centerx-self.rect.centerx))-90
@@ -342,7 +342,7 @@ class player(pygame.sprite.Sprite):
         self.accel=False
 
 
-        self.playerplane=pygame.image.load(f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Forward.png")#Planes/F22/project-plane-icon.png
+        self.playerplane=pygame.image.load(f"D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Forward.png")#Planes/F22/project-plane-icon.png
         self.maxx=self.collection[self.selected][2]
         self.least=-abs(self.maxx)
         self.planetick=0
@@ -356,15 +356,15 @@ class player(pygame.sprite.Sprite):
 
 
         if not replitbad:
-            self.shoot=pygame.mixer.Sound("sound/hitHurt.wav")
+            self.shoot=pygame.mixer.Sound("D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/sound/hitHurt.wav")
             self.shoot.set_volume(overall_sound)
-            self.death_sound=pygame.mixer.Sound("sound/DEATH.wav")
+            self.death_sound=pygame.mixer.Sound("D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/sound/DEATH.wav")
             self.death_sound.set_volume(overall_sound)
         self.iterative=0
 
         self.facing=360
 
-        self.angle=[(360,f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Forward.png"),(270,f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Left.png"),(-180,f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Down.png"),(-270,f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Right.png")]
+        self.angle=[(360,f"D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Forward.png"),(270,f"D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Left.png"),(-180,f"D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Down.png"),(-270,f"D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Right.png")]
         self.constantx,self.constanty=0,0
 
         self.group=group
@@ -399,8 +399,8 @@ class player(pygame.sprite.Sprite):
 
         self.health=self.collection[self.selected][3] if  not abilityselection.advanced() else self.collection[self.selected][3]*1.1
 
-        self.angle=[(360,f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Forward.png"),(270,f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Left.png"),(-180,f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Down.png"),(-270,f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Right.png")]
-        self.playerplane=pygame.image.load(f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Forward.png")#Planes/F22/project-plane-icon.png
+        self.angle=[(360,f"D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Forward.png"),(270,f"D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Left.png"),(-180,f"D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Down.png"),(-270,f"D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Right.png")]
+        self.playerplane=pygame.image.load(f"D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Forward.png")#Planes/F22/project-plane-icon.png
         self.maxx=self.collection[self.selected][2]
 
 
@@ -588,7 +588,7 @@ class round:
         self.score_text=self.sfont.render(f"{highscore}",True,(255,255,255))
         self.timer=self.sfont.render(f"{timer_m}:{timer_s}",True,(255,255,255))
 
-        self.explosion=pygame.image.load("Bullet_Sprite/explosion.png")
+        self.explosion=pygame.image.load("D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/Bullet_Sprite/explosion.png")
         self.explosionradius=self.explosion.get_rect()
         self.explosionradius[2]+=1000
         self.explosionradius[3]+=1000
@@ -597,7 +597,7 @@ class round:
 
         if not replitbad:
 
-            self.dead_enemy_sound=pygame.mixer.Sound("sound/dead_enemy.wav")
+            self.dead_enemy_sound=pygame.mixer.Sound("D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/sound/dead_enemy.wav")
             self.dead_enemy_sound.set_volume(overall_sound)
     def enemyorbossupdate(self,list):
         global highscore,experience

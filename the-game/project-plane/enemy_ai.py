@@ -38,13 +38,13 @@ class enemy(pygame.sprite.Sprite):
 
         if len(self.collection[self.selected])>=2:
             self.max=self.collection[self.selected][2]
-        self.enemy_sprite=pygame.image.load(f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Forward.png")
+        self.enemy_sprite=pygame.image.load(f"D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Forward.png")
 
 
         self.facing=360
         self.facingindex=0
         #I hate that this is the solution to rotating the plane        
-        self.angle=[(360,f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Forward.png"),(270,f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Left.png"),(-180,f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Down.png"),(-270,f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Right.png")]
+        self.angle=[(360,f"D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Forward.png"),(270,f"D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Left.png"),(-180,f"D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Down.png"),(-270,f"D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Right.png")]
 
         pygame.sprite.Sprite.__init__(self)
 

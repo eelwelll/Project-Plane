@@ -6,7 +6,7 @@ import csv
 import pandas as pd
 
 
-projecticon=pygame.image.load("Planes/F22/F22-Facing-Forward.png")
+projecticon=pygame.image.load("D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/Planes/F22/F22-Facing-Forward.png")
 pygame.display.set_caption("project plane")
 pygame.display.set_icon(projecticon)
 pygame.font.init()
@@ -118,7 +118,7 @@ class dropdown:
     def drop(self,file,change):
         global y
         r=self.content.get_height()+5
-        dropper=open(f"{file}.csv","r").read().splitlines()
+        dropper=open(f"D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/{file}.csv","r").read().splitlines()
 
         for line in dropper:
 
@@ -197,7 +197,7 @@ class slider:
         self.max=pygame.Rect((self.x+100,self.y+25),(10,10))
         self.least=pygame.Rect((self.x-10,self.y+25),(10,10))
         if not replitbad:
-            self.soundeffect=pygame.mixer.Sound("sound/synth.wav")
+            self.soundeffect=pygame.mixer.Sound("D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/sound/synth.wav")
         self.value=self.sliderr[0]-self.line[0]
 
         self.held=0
@@ -251,10 +251,10 @@ class button:
         self.sfont = pygame.font.SysFont("arialblack", 40, bold=False)
         self.placeholder=self.sfont.render("I",True,(255,255,255))
         if not replitbad:
-            self.hover=pygame.mixer.Sound("sound/click.wav")
+            self.hover=pygame.mixer.Sound("D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/sound/click.wav")
             self.hover.set_volume(overall_sound)
 
-            self.selected=pygame.mixer.Sound(f"sound/clickonmenu.wav")
+            self.selected=pygame.mixer.Sound(f"D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/sound/clickonmenu.wav")
 
             self.selected.set_volume(overall_sound)
         self.hoveronce=False
@@ -336,10 +336,10 @@ class shop_button:
 
 
         if not replitbad:
-            self.hover=pygame.mixer.Sound("sound/click.wav")
+            self.hover=pygame.mixer.Sound("D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/sound/click.wav")
 
-            self.selected=pygame.mixer.Sound("sound/clickonmenu.wav")
-            self.openshop=pygame.mixer.Sound("sound/shop_open.wav")
+            self.selected=pygame.mixer.Sound("D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/sound/clickonmenu.wav")
+            self.openshop=pygame.mixer.Sound("D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/sound/shop_open.wav")
 
 
 
@@ -445,7 +445,7 @@ class shop_button:
 
 
                     if self.gotten:
-                            coins_have=open("how_many_coins.csv","r+")
+                            coins_have=open("D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/how_many_coins.csv","r+")
                             
                             
                             if not replitbad:
@@ -455,10 +455,10 @@ class shop_button:
                                 if int(lin)>=self.cost_number:
                                     temp=int(lin)-self.cost_number
 
-                                    coins_have=open("how_many_coins.csv","w")
+                                    coins_have=open("D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/how_many_coins.csv","w")
                                     coins_have.write(f"{temp}")
                                     coins_have.close()
-                                    shopper=open("shop_contain.csv","r").read().splitlines()
+                                    shopper=open("D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/shop_contain.csv","r").read().splitlines()
                                     shopy=csv.reader(shopper, delimiter = ",")
                                     shop_get_list=list(shopy)
                                     for col_num,row in enumerate(shopy):
@@ -494,11 +494,11 @@ class shoop:
         self.scroll_line_backgroup=pygame.Rect((screen.get_width()/1.5-self.description_wall.w//3,2),(screen.get_width()/100,screen.get_height()//self.description_wall.h))
         self.coins=0
         self.cost=self.sfont.render(f"{self.coins}",True,self.white)
-        original=pygame.image.load("menu-item/coin.png")
+        original=pygame.image.load("D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/menu-item/coin.png")
         self.coin=pygame.transform.scale(original,(self.cost.get_height(),self.cost.get_height())) 
 
         if not replitbad:
-            self.openshop=pygame.mixer.Sound("sound/shop_open.wav")
+            self.openshop=pygame.mixer.Sound("D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/sound/shop_open.wav")
 
 
 
@@ -508,7 +508,7 @@ class shoop:
 
 
     def shop_create(self):
-        coins_have=open("how_many_coins.csv","r").read().splitlines()
+        coins_have=open("D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/how_many_coins.csv","r").read().splitlines()
         for coin in coins_have:
             self.coins=coin
 
@@ -560,7 +560,7 @@ class shoop:
         self.back_button.check(lambda:goback())
     def shop_maker(self):
         self.listofitems.clear()
-        with open("shop_contain.csv") as shop_items:
+        with open("D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/shop_contain.csv") as shop_items:
             shop_items= csv.reader(shop_items, delimiter = ",")
             xofbox=2
             yofbox=2
@@ -616,7 +616,7 @@ class highscore:
         #highscore(x,y).highscore_check()
 
     def figure(self):
-        high=open("highscore.csv","r").read().splitlines()
+        high=open("D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/highscore.csv","r").read().splitlines()
         r=0
 
         for l in range(3):
@@ -798,7 +798,7 @@ class Menu:
       screen.blit(self.name, (self.buttonplacex - self.name.get_width()//2, self.buttonplacey - (screen.get_height()*self.diff*3)))
   def play_game(self):
 
-      with open("settings-containing.csv","w",newline="") as settings_file:
+      with open("D:/SteamLibrary/git_repo_projectplane/Project-Plane/the-game/settings-containing.csv","w",newline="") as settings_file:
         csv.writer(settings_file).writerows(movement)
 
         settings_file.write(f"{screen.get_width()}\n{screen.get_height()}\n{overall_sound}")
