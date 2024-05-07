@@ -9,7 +9,7 @@ import math
 pygame.display.set_caption("project plane")
 projecticon=pygame.image.load("Planes/F22/F22-Facing-Forward.png")
 pygame.display.set_icon(projecticon)
-replitbad=True
+replitbad=False
 timer_m=0
 
 timer_s=0
@@ -54,7 +54,7 @@ overall_sound=float(settingspreference[len(settingspreference)-1])
 
 
 moveup,moveleft,movedown,moveright=movement[0],movement[1],movement[2],movement[3]
-collection=[("F2F",7,3,500),("F4U",6,5,750),("F22",2,10,1000),("beaufighter",1,10,1000)]#0= plane,1= fire rate, 2= speed, 3= health
+collection=[("F2F",7,3,500,200),("F4U",6,5,750,200),("F22",2,10,1000,200),("F35",6,5,1100,200),("beaufighter",1,10000,1000,200)]#0= plane,1= fire rate, 2= speed, 3= health, 4= missile firerate
 enemycollection=[("Bi-Enemy",5,None),("tempest",7,None),("harrier",10,None)]
 bosscollection=[("beaufighter",10,1)] # 0= plane, 1= speed 
 abilities=[("Propeller-Dispresion"),("Missile-Barrage"),("High-Calibre"),("Accelerated-Shot"),("Advanced-Airframe"),("The-Fat-Man")]
@@ -73,8 +73,9 @@ clock = pygame.time.Clock()
 tick=0
 
 from paused_menu import paused
-
 cloudsonscreen=[]
+from shop_contain_list import shop_class
+shop_contain=shop_class()
 
 
 
@@ -222,9 +223,10 @@ class bullet(pygame.sprite.Sprite):
             self.selected="High"
         if aim:
             self.selected="aim"
-
-        self.bullet_image=pygame.image.load("Bullet_Sprite/Bullet.png") # the bullet
-
+        
+        self.bullet_image=pygame.image.load(f"Bullet_Sprite/{self.selected}.png") # the bullet
+        if boss:
+            self.bullet_image=pygame.image.load("Bullet_Sprite/Bullet.png")
         self.bulletspawnx,self.bulletspawny=x,y # where the bullet spawns
         self.vertical=0
         self.diagonal=0
@@ -238,8 +240,9 @@ class bullet(pygame.sprite.Sprite):
         self.rect=self.image.get_rect()
 
         self.rect.center=x,y
+        
 
-        if not boss:
+        if( not boss ) and not shop_contain.bullet_upgrade:
             if facing == 270:
                 self.diagonal=-1
             self.bullet_image=pygame.image.load(f"Bullet_Sprite/{self.selected}-Facing-Left.png")
@@ -253,8 +256,15 @@ class bullet(pygame.sprite.Sprite):
                 self.vertical=1
                 self.bullet_image=pygame.image.load(f"Bullet_Sprite/{self.selected}-Facing-Down.png")
         else:
+            place=0
+            if boss:
+                placex=firstplane.rect.centerx
+                placey=firstplane.rect.centery
+            else:
+                placex=pygame.mouse.get_pos()[0]
+                placey=pygame.mouse.get_pos()[1]
             '''This works for getting the angle from the two points, use this equation if wanting to give the plane full 360 movement'''
-            self.degreeofbullet=math.degrees(math.atan2(firstplane.rect.centery-self.rect.centery,firstplane.rect.centerx-self.rect.centerx))-90
+            self.degreeofbullet=math.degrees(math.atan2(placey-self.rect.centery,placex-self.rect.centerx))-90
             supertester=math.degrees(math.atan2(pygame.mouse.get_pos()[1]-self.rect.centery,pygame.mouse.get_pos()[0]-self.rect.centerx))-90
             self.degreeofbullet=abs(self.degreeofbullet) if self.degreeofbullet<=0 else -abs(self.degreeofbullet)
             supertester=abs(supertester) if supertester<=0 else -abs(supertester)
@@ -266,9 +276,9 @@ class bullet(pygame.sprite.Sprite):
             range=[0.9,1,1.1,1.2,1.3]
             self.diagonal=math.cos(math.radians(self.degreeofbullet))*self.velocity
             self.vertical=math.sqrt(math.pow(self.velocity,2) - math.pow(self.diagonal,2))
-
-            self.diagonal=-abs(random.choice(range[0:2])+self.diagonal if self.degreeofbullet>180 else 1-self.diagonal) if self.degreeofbullet>180 or self.degreeofbullet<0 else (1-self.diagonal if self.degreeofbullet<90 else abs(1+self.diagonal))
-            self.vertical=-abs(random.choice(range[1:3])-(self.vertical)) if self.degreeofbullet>90 else random.choice(range[2:4])-self.vertical
+  
+            self.diagonal=-abs((1)+self.diagonal if self.degreeofbullet>180 else 1-self.diagonal) if self.degreeofbullet>180 or self.degreeofbullet<0 else (1-self.diagonal if self.degreeofbullet<90 else abs(1+self.diagonal))
+            self.vertical=-abs((1.1)-(self.vertical)) if self.degreeofbullet>90 else (random.choice(range[2:4]) if boss else 1.2)-self.vertical
 
 
         self.group=group
@@ -298,7 +308,7 @@ class bullet(pygame.sprite.Sprite):
             if self.selected=="High":
                 enemy_count.damage(20)
             if self.selected=="aim":
-                enemy_count.damage(30)
+                enemy_count.damage(30 if not abilityselection.highcalibre else 50)
 
 
 
@@ -347,7 +357,7 @@ class player(pygame.sprite.Sprite):
         self.least=-abs(self.maxx)
         self.planetick=0
         self.missiletick=0
-        self.missilefirerate=200
+        self.missilefirerate=self.collection[self.selected][4]
         self.bulletlist=bulletlist
 
         self.health=self.collection[self.selected][3] if  not abilityselection.advanced() else self.collection[self.selected][3]*1.1
@@ -476,12 +486,12 @@ class player(pygame.sprite.Sprite):
         #self.group.draw(screen) # DRAWS BLACK BOX AROUND PLANE
         screen.blit(self.playerplane,(self.rect.x,self.rect.y)) #DRAWS PLANE
 
-        e=self.missiletick%self.missilefirerate==0 and abilityselection.missilebarrage
+        e=self.missiletick%self.missilefirerate==0 and (abilityselection.missilebarrage or self.collection[self.selected][0]=="F35")
         if (pygame.key.get_pressed()[K_SPACE] and self.planetick%self.firerate==0 )and not(self.missiletick%self.missilefirerate==0 and abilityselection.missilebarrage):
             if not replitbad:
                 self.shoot.play()
 
-            self.bulletlist.append(bullet(bullets,self.rect.x+self.playerplane.get_width()//2 -10 if self.selected==1 else self.rect.x+self.playerplane.get_width()//2,self.rect.y+self.playerplane.get_height()//2 - 10 if self.selected == 1 else self.rect.y+self.playerplane.get_height()//2,self.facing,False,False))
+            self.bulletlist.append(bullet(bullets,self.rect.x+self.playerplane.get_width()//2 -10 if self.selected==1 else self.rect.x+self.playerplane.get_width()//2,self.rect.y+self.playerplane.get_height()//2 - 10 if self.selected == 1 else self.rect.y+self.playerplane.get_height()//2,self.facing,False if not self.collection[self.selected][0]=="F35" else True,False))
             if self.selected==1:
                 if not replitbad:
                     self.shoot.play()
@@ -507,7 +517,7 @@ class player(pygame.sprite.Sprite):
                 if not replitbad:
                     self.death_sound.play()
                 self.iterative+=1
-            ded.message()
+            ded.message(highscore)
 
 
 
@@ -536,12 +546,16 @@ class player(pygame.sprite.Sprite):
                             #self.facing-self.angle[number]
                             self.playerplane=pygame.image.load(self.angle[number][1])
                             self.facing=self.angle[number][0]
-
+                        move_by=(keys[1]*1.5 if keys[1]>=0 else -abs(keys[1]*1.5)) if shop_contain.fuel_upgrade else keys[1]
+                        
+                        
+                        
+                        
                         if keys[2]=="u": # if player is moving vertical
-                            self.constanty+=keys[1] if self.least-1<=self.constanty+keys[1] and self.constanty+keys[1] <= self.maxx else 0
+                            self.constanty+=move_by if self.least<=self.constanty+move_by and self.constanty+move_by <= self.maxx else 0
 
                         else: # if player is moving diagonal
-                            self.constantx+=keys[1] if self.least-1<=self.constantx+keys[1] and self.constantx+keys[1] <= self.maxx else 0
+                            self.constantx+=move_by if self.least<=self.constantx+move_by and self.constantx+move_by <= self.maxx else 0
 
 
     def positionx(self):

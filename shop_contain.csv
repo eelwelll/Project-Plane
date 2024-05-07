@@ -1,8 +1,0 @@
-name,image,description,gotten,cost,idk
-Bullet hell,Bullet_Sprite/Bullet.png, Cutting-edge technology derived from Foreign objects allows for aiming in different directions from where the plane is facing  . .,False,100,1
-Average Compressor,Bullet_Sprite/Bullet.png, A better compressor leads to an overall increase in engine performance  . .,False,200,1
-High quality fuel,Bullet_Sprite/Bullet.png, Better fuel has allowed the plane to carry less overall fuel leading to faster acceleration  . .,False,300,1
-Gunner,Bullet_Sprite/Bullet.png, A top turret has been placed on your plane it might weigh the plane down though  . .,False,400,1
-Recovery,Bullet_Sprite/Bullet.png, The plane now gains health over time  . .,False,500,1
-Friendly support,Bullet_Sprite/Bullet.png, Placeholder text  . .,False,1000,1
-Advanced intelligence,Bullet_Sprite/Bullet.png, Placeholder text  . .,False,200,1

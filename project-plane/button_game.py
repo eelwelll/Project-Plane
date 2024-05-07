@@ -19,9 +19,9 @@ class button:
         self.hoveronce=False
         self.hovertick=0
     def text(self,ability,bigbox,anumber,textbox,evolve):
-
+            
             self.rect=pygame.Rect((self.x,self.y), (self.content.get_width() if self.content.get_width()>100 else 100,self.content.get_height()))
-
+            mouse = pygame.mouse.get_pos()
             if self.rect.collidepoint(mouse): #0, 195, 237
                 pygame.draw.rect(self.screen,(0, 195, 237),self.rect)
                 self.hoveronce=True
