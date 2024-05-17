@@ -68,7 +68,7 @@ abilitydescription=["The propeller seems to be malfunctioning,^ wind is disperss
                     "The Fat Man^",
                      "A burst of electromagnetic radiation,^ stopping enemies in their tracks, looks rather alien.",
                      "Why hasn't anyone thought of putting^ a shotgun on a plane yet!",
-                     "A 10% increase in coin gain,^ nice!",
+                     "A 200% increase in coin/highscore gain,^ nice!",
                      "restore plane with 75% health upon death,^ something strange happens though"]
 
 pause=False
@@ -193,15 +193,20 @@ class shotgun_shoot:
                 self.vertical=1#
                 self.frame=pygame.transform.rotate(self.frame,180)
         self.rect=self.frame.get_rect()
-        self.rect.centerx,self.rect.centery=xx+(self.diagonal*100),yy+(self.vertical*100)
+        self.xx,self.yy=xx,yy
+        self.rect.centerx,self.rect.centery=xx+(-abs(self.diagonal*firstplane.rect.w*2) if self.diagonal<0 else self.diagonal*firstplane.rect.w+firstplane.rect.w),yy+(-abs(self.vertical*firstplane.rect.h*2) if self.vertical<0 else self.vertical*firstplane.rect.h*2)
+        if self.diagonal==0:
+            self.rect.x-=firstplane.rect.w
 
     def image_get(self):
-        screen.blit(self.frame,(self.rect.centerx,self.rect.centery))
+        screen.blit(self.frame,(self.rect.x,self.rect.y))
+        #pygame.draw.rect(screen,(255,255,255),self.rect)
         if tick%4==0:
             self.frameon=self.frameon+1 if self.frameon+1<6 else 0
             self.reset_count+=1 if self.frameon==0 else 0
-        print(self.reset_count)
+        
         self.frame=pygame.image.load(f"shotgun_sprite_sheet/shotgun_shot-{self.frameon}.png")
+
         if self.facing == 270: # left
                 self.diagonal=-1
                 self.frame=pygame.transform.rotate(self.frame,90)
@@ -269,16 +274,27 @@ class abilitywheel:
 
     def abilitymaker(self):
         for abilities in self.collectedabilities:
-            self.advancedairframe=abilities=="Advanced-Airframe"
-            self.highcalibre=abilities=="High-Calibre"
-            self.AccelteratedShot=abilities=="Accelerated-Shot" 
-            self.missilebarrage=abilities=="Missile-Barrage" 
-            self.propeller=abilities =="Propeller-Dispresion" 
-            self.thefatman=abilities == "The-Fat-Man"
-            self.emp=abilities == "EMP"
-            self.kissoflife = abilities == "The-kiss-of-life"
-            self.shotgun= abilities == "Shotgun"
-            self.coinmad= abilities == "coin-madness"
+            if abilities=="Advanced-Airframe":
+                self.advancedairframe=True
+            if abilities=="High-Calibre":
+                self.highcalibre=True
+            if abilities=="Accelerated-Shot":
+                self.AccelteratedShot=True
+            if abilities=="Missile-Barrage":
+                self.missilebarrage=True 
+            if abilities =="Propeller-Dispresion":
+                self.propeller=True
+            if abilities == "The-Fat-Man":
+                self.thefatman=True
+            if abilities == "EMP":
+                self.emp=True
+            if abilities == "The-kiss-of-life":
+                self.kissoflife = True
+            if abilities == "Shotgun":
+                self.shotgun= True
+            if abilities == "coin-madness":
+                self.coinmad= True
+        
                 
 
     def randomthree(self):
@@ -331,18 +347,7 @@ class abilitywheel:
             l.check(lambda: l.select_ability(self.cangetability[number][0],self.collectedabilities,abilityselection.flip()))
             l.text(self.cangetability[number][0],(self.bigbox.x*2.25,self.bigbox.y+self.bigbox.y//10),self.cangetability[number][1],self.textbox,(True if self.cangetability[0]=="You-can-evolve!" else False))
 
-    def reset(self):
-        self.AccelteratedShot=False
-        self.evolve=False
-        self.highcalibre=False
-        self.missilebarrage=False
-        self.propeller=False
-        self.thefatman=False
-        self.advancedairframe=False
-        self.emp=False
-        self.kissoflife=False
-        self.shotgun=False
-        self.coinmad=False
+
 
     def stillgetting(self): return self.selecting
 
@@ -354,10 +359,7 @@ class abilitywheel:
 
 abilityselection=abilitywheel()
 
-
-
-
-
+abilityselection.shotgun=True
 
 running=True
 
@@ -558,7 +560,17 @@ class player(pygame.sprite.Sprite):
     def evolver(self):
         self.selected+=1 if self.selected+1<len(self.collection) else 0
         abilityselection.collectedabilities=[]
-        abilityselection.reset()
+        abilityselection.AccelteratedShot=False
+        abilityselection.evolve=False
+        abilityselection.highcalibre=False
+        abilityselection.missilebarrage=False
+        abilityselection.propeller=False
+        abilityselection.thefatman=False
+        abilityselection.advancedairframe=False
+        abilityselection.emp=False
+        abilityselection.kissoflife=False
+        abilityselection.shotgun=False
+        abilityselection.coinmad=False
 
         self.firerate=self.collection[self.selected][1]
 
@@ -700,13 +712,22 @@ class player(pygame.sprite.Sprite):
             self.revive_tick+=1
             if self.health<=0 and self.revive_count>=1:
                 self.health=self.collection[self.selected][3]*0.75 if  not abilityselection.advanced() else (self.collection[self.selected][3]*1.1)*0.75
-                abilityselection.reset()
+                abilityselection.AccelteratedShot=False
+                abilityselection.evolve=False
+                abilityselection.highcalibre=False
+                abilityselection.missilebarrage=False
+                abilityselection.propeller=False
+                abilityselection.thefatman=False
+                abilityselection.advancedairframe=False
+                abilityselection.emp=False
+                abilityselection.kissoflife=False
+                abilityselection.shotgun=False
+                abilityselection.coinmad=False
                 self.revive_count-=1
                 listofenimies.clear()
                 if not replitbad:
                     self.death_sound.play()
                 
-            print(self.revive_count)
 
 
         if self.health<=0:
@@ -846,7 +867,7 @@ class round:
 
                 if not replitbad:
                     self.dead_enemy_sound.play()
-                highscore+=10
+                highscore+=10 if not abilityselection.coinmad else 10*2
                 experience+=(enemycountter.xpgain*3*1.25 if shop_contain.advanced_int_upgrade else enemycountter.xpgain*3 )if firstplane.selected<=3 else (enemycountter.xpgain*6*1.25 if shop_contain.advanced_int_upgrade else enemycountter.xpgain*6)
         for explosions in self.listexplosion:
 
