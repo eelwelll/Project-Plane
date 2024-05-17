@@ -6,6 +6,8 @@ import os
 import random
 from itertools import islice
 import math
+
+
 pygame.display.set_caption("project plane")
 projecticon=pygame.image.load("Planes/F22/F22-Facing-Forward.png")
 pygame.display.set_icon(projecticon)
@@ -54,16 +56,20 @@ overall_sound=float(settingspreference[len(settingspreference)-1])
 
 
 moveup,moveleft,movedown,moveright=movement[0],movement[1],movement[2],movement[3]
-collection=[("F2F",7,3,500,200),("F4U",6,5,750,200),("F22",2,10,1000,200),("F35",6,5,1100,200),("beaufighter",1,10000,1000,200)]#0= plane,1= fire rate, 2= speed, 3= health, 4= missile firerate
+collection=[("F2F",7,3,500,500),("F4U",6,4,750,200),("F22",2,5,1000,200),("F35",6,4,1100,200),("beaufighter",1,10000,1000,200)]#0= plane,1= fire rate, 2= speed, 3= health, 4= missile firerate
 enemycollection=[("Bi-Enemy",5,None),("tempest",7,None),("harrier",10,None)]
 bosscollection=[("beaufighter",10,1)] # 0= plane, 1= speed 
-abilities=[("Propeller-Dispresion"),("Missile-Barrage"),("High-Calibre"),("Accelerated-Shot"),("Advanced-Airframe"),("The-Fat-Man")]
+abilities=[("Propeller-Dispresion"),("Missile-Barrage"),("High-Calibre"),("Accelerated-Shot"),("Advanced-Airframe"),("The-Fat-Man"),("EMP"),("Shotgun"),("coin-madness"),("The-kiss-of-life")]
 abilitydescription=["The propeller seems to be malfunctioning,^ wind is disperssing all over now!",
                     "The plane is now capable of holding Aim-9s,^ it does takes a while to reload",
                     "High calibre rounds pierce through the enemy,^ causing enemies to explode!",
                     "The cannon fires at a higher rate^",
                     "The mechanical structure of the plane has increased^",
-                    "The Fat Man^"]
+                    "The Fat Man^",
+                     "A burst of electromagnetic radiation,^ stopping enemies in their tracks, looks rather alien.",
+                     "Why hasn't anyone thought of putting^ a shotgun on a plane yet!",
+                     "A 10% increase in coin gain,^ nice!",
+                     "restore plane with 75% health upon death,^ something strange happens though"]
 
 pause=False
 
@@ -88,15 +94,133 @@ class propeller_dispersion:
         self.rect.center=xx,yy
         self.x,self.y=xx-10,yy
         self.rect=self.rect.inflate(self.frame.get_width()*3,self.frame.get_height()*3)
+        self.cooldown=True
     def image_get(self):
         if tick%6==0:
             self.frameon=self.frameon+1 if self.frameon+1<9 else 0
         self.frame=pygame.image.load(f"prop/propeller-{self.frameon}.png")
+
         self.frame=pygame.transform.scale_by(self.frame,4)
         screen.blit(self.frame,(self.rect.x,self.rect.y))
 
         self.rect.x=firstplane.rect.x-self.frame.get_width()//4
         self.rect.y=firstplane.rect.y-self.frame.get_height()//4
+
+class emp:
+    def __init__(self,xx,yy,facing):
+        self.frame=pygame.image.load("emp_sprite_sheeet/Lightning-0.png")
+        self.empblast_frame=pygame.image.load("emp_sprite_sheeet/emp-blast-0.png")
+        self.shoot=pygame.image.load("emp_sprite_sheeet/EMP_SHOOT.png")
+        self.explosion_radius=pygame.image.load("emp_sprite_sheeet/emp-blast-5.png").get_rect().scale_by(2)
+        self.rect=self.frame.get_rect()
+        self.frameon=0
+        self.empframeon=0
+        self.rect.center=xx,yy
+        self.explosion_radius.center=xx,yy
+        self.explosion=False
+        self.zero_count=0
+        self.diagonal=0
+        self.vertical=0
+        self.kill=False
+        if facing == 270: # left
+                self.diagonal=-1
+                self.shoot=pygame.transform.rotate(self.shoot,90)
+        if facing == -270: # right
+                self.diagonal=1
+                self.shoot=pygame.transform.rotate(self.shoot,-90)
+
+        if facing==360: # up
+                self.vertical=-1
+
+        if facing == -180: # down
+                self.vertical=1#
+                self.shoot=pygame.transform.rotate(self.shoot,180)
+
+
+
+        self.rect.x,self.rect.y=xx-self.frame.get_width()//2,yy-self.frame.get_height()//2
+        self.explosion_radius.x,self.explosion_radius.y=xx-self.explosion_radius.w//2,yy-self.explosion_radius.h//2
+    def image_get(self):
+        if self.explosion:
+            self.vertical,self.diagonal=0,0
+
+        if self.zero_count>=5:
+
+            self.kill=True
+        if tick%7==0 and self.explosion:
+            self.frameon=self.frameon+1 if self.frameon+1<6 else 0
+            self.zero_count+=1
+        if self.explosion:
+            self.empblast_frame=pygame.image.load(f"emp_sprite_sheeet/emp-blast-{self.frameon}.png")
+            self.frame=pygame.image.load(f"emp_sprite_sheeet/Lightning-{self.frameon}.png")
+            self.empblast_frame=pygame.transform.scale_by(self.empblast_frame,1.24)
+            oneonscreen=self.empblast_frame
+
+        else:
+            self.rect.x+=self.diagonal*3
+            self.rect.y+=self.vertical*3
+            self.explosion_radius.x=self.rect.x
+            self.explosion_radius.y=self.rect.y
+            oneonscreen=self.shoot
+
+
+
+
+        screen.blit(oneonscreen,(self.rect.x,self.rect.y))
+        #pygame.draw.rect(screen,(255,255,255),self.explosion_radius)
+        #pygame.draw.rect(screen,(255,255,255),self.rect)
+
+class shotgun_shoot:
+    def __init__(self,xx,yy,facing) -> None:
+        self.frameon=0
+        self.frame=pygame.image.load(f"shotgun_sprite_sheet/shotgun_shot-{self.frameon}.png")
+        self.frame=pygame.transform.scale_by(self.frame,2)
+        self.diagonal,self.vertical=0,0
+        self.facing=facing
+        
+        self.reset_count=0
+        if facing == 270: # left
+                self.diagonal=-1
+                self.frame=pygame.transform.rotate(self.frame,90)
+        if facing == -270: # right
+                self.diagonal=1
+                self.frame=pygame.transform.rotate(self.frame,-90)
+
+        if facing==360: # up
+                self.vertical=-1
+
+        if facing == -180: # down
+                self.vertical=1#
+                self.frame=pygame.transform.rotate(self.frame,180)
+        self.rect=self.frame.get_rect()
+        self.rect.centerx,self.rect.centery=xx+(self.diagonal*100),yy+(self.vertical*100)
+
+    def image_get(self):
+        screen.blit(self.frame,(self.rect.centerx,self.rect.centery))
+        if tick%4==0:
+            self.frameon=self.frameon+1 if self.frameon+1<6 else 0
+            self.reset_count+=1 if self.frameon==0 else 0
+        print(self.reset_count)
+        self.frame=pygame.image.load(f"shotgun_sprite_sheet/shotgun_shot-{self.frameon}.png")
+        if self.facing == 270: # left
+                self.diagonal=-1
+                self.frame=pygame.transform.rotate(self.frame,90)
+        if self.facing == -270: # right
+                self.diagonal=1
+                self.frame=pygame.transform.rotate(self.frame,-90)
+
+        if self.facing==360: # up
+                self.vertical=-1
+
+        if self.facing == -180: # down
+                self.vertical=1#
+                self.frame=pygame.transform.rotate(self.frame,180)
+        self.frame=pygame.transform.scale_by(self.frame,2)
+
+
+
+
+
 
 
 
@@ -127,9 +251,13 @@ class abilitywheel:
         self.missilebarrage=False
         self.propeller=False
         self.thefatman=False
+        self.emp=False
+        self.kissoflife=False
+        self.shotgun=False
+        self.coinmad=False
         self.got=[]
     def update_location(self):
-        if self.real==False:
+        if not self.real:
             self.cangetability=[]
             self.canget=[]
             self.justabilitynames=[]
@@ -141,18 +269,17 @@ class abilitywheel:
 
     def abilitymaker(self):
         for abilities in self.collectedabilities:
-            if abilities=="Advanced-Airframe":
-                self.advancedairframe=True
-            if abilities=="High-Calibre":
-                self.highcalibre=True
-            if abilities=="Accelerated-Shot":
-                self.AccelteratedShot=True
-            if abilities=="Missile-Barrage":
-                self.missilebarrage=True
-            if abilities =="Propeller-Dispresion":
-                self.propeller=True
-            if abilities == "The-Fat-Man":
-                self.thefatman=True
+            self.advancedairframe=abilities=="Advanced-Airframe"
+            self.highcalibre=abilities=="High-Calibre"
+            self.AccelteratedShot=abilities=="Accelerated-Shot" 
+            self.missilebarrage=abilities=="Missile-Barrage" 
+            self.propeller=abilities =="Propeller-Dispresion" 
+            self.thefatman=abilities == "The-Fat-Man"
+            self.emp=abilities == "EMP"
+            self.kissoflife = abilities == "The-kiss-of-life"
+            self.shotgun= abilities == "Shotgun"
+            self.coinmad= abilities == "coin-madness"
+                
 
     def randomthree(self):
         self.selecting=True
@@ -161,10 +288,12 @@ class abilitywheel:
         self.cangetability=[]
         self.canget=[]
         self.justabilitynames=[]
+
         if (len(abilities) - len(self.collectedabilities))==0:
             self.evolve=True
 
         if not self.evolve:
+
             while len(self.cangetability) < 3 if (len(abilities) - len(self.collectedabilities))>3 else len(self.cangetability)<(len(abilities) - len(self.collectedabilities)):
 
                 e=random.randint(0,len(abilities)-1)
@@ -172,12 +301,16 @@ class abilitywheel:
                 while abilities[e] in self.justabilitynames or abilities[e] in self.collectedabilities:
                     e=random.randint(0,len(abilities)-1)
                 text=self.sfont.render(f"{abilities[e]}",True,(255,255,255))
-                self.canget.append(button((self.bigbox.x+self.bigbox.x//2)-text.get_width()/2,(self.bigbox.y+self.bigbox.y//3)+self.bigbox.y//2*l,text,replitbad,overall_sound,screen,abilityselection,abilitydescription))
+
+                self.canget.append(button_game((self.bigbox.x+self.bigbox.x//2)-text.get_width()/2,(self.bigbox.y+self.bigbox.y//3)+self.bigbox.y//2*l,text,replitbad,overall_sound,screen,abilityselection,abilitydescription))
                 self.cangetability.append((abilities[e],e))
                 self.justabilitynames.append(abilities[e])
                 l+=1
+
+
+
         if self.evolve:
-            self.canget.append(button((self.bigbox.x+self.bigbox.x//2)-self.sfont.render("You can evolve!",True,(255,255,255)).get_width()/2,(self.bigbox.y+self.bigbox.y//3)+self.bigbox.y//2*l,self.sfont.render("You can evolve!",True,(255,255,255)),replitbad,overall_sound,screen,abilityselection,abilitydescription))
+            self.canget.append(button_game((self.bigbox.x+self.bigbox.x//2)-self.sfont.render("You can evolve!",True,(255,255,255)).get_width()/2,(self.bigbox.y+self.bigbox.y//3)+self.bigbox.y//2*l,self.sfont.render("You can evolve!",True,(255,255,255)),replitbad,overall_sound,screen,abilityselection,abilitydescription))
             self.cangetability.append("You-can-evolve!")
 
 
@@ -186,16 +319,30 @@ class abilitywheel:
 
 
     def abilityscreen(self):
+
         abilityselection.update_location()
+
         pygame.draw.rect(screen,(0, 195, 237),self.bigbox)
 
+
         for number,l in enumerate(self.canget):
+
             self.textbox=pygame.Rect(self.bigbox.x*2,self.bigbox.y+5,self.bigbox.x-5,self.bigbox.y*2-20)
-            l.check(lambda:l.select_ability(self.cangetability[number][0],self.collectedabilities,abilityselection.flip()))
+            l.check(lambda: l.select_ability(self.cangetability[number][0],self.collectedabilities,abilityselection.flip()))
             l.text(self.cangetability[number][0],(self.bigbox.x*2.25,self.bigbox.y+self.bigbox.y//10),self.cangetability[number][1],self.textbox,(True if self.cangetability[0]=="You-can-evolve!" else False))
 
-
-
+    def reset(self):
+        self.AccelteratedShot=False
+        self.evolve=False
+        self.highcalibre=False
+        self.missilebarrage=False
+        self.propeller=False
+        self.thefatman=False
+        self.advancedairframe=False
+        self.emp=False
+        self.kissoflife=False
+        self.shotgun=False
+        self.coinmad=False
 
     def stillgetting(self): return self.selecting
 
@@ -223,7 +370,7 @@ class bullet(pygame.sprite.Sprite):
             self.selected="High"
         if aim:
             self.selected="aim"
-        
+
         self.bullet_image=pygame.image.load(f"Bullet_Sprite/{self.selected}.png") # the bullet
         if boss:
             self.bullet_image=pygame.image.load("Bullet_Sprite/Bullet.png")
@@ -240,7 +387,7 @@ class bullet(pygame.sprite.Sprite):
         self.rect=self.image.get_rect()
 
         self.rect.center=x,y
-        
+
 
         if( not boss ) and not shop_contain.bullet_upgrade:
             if facing == 270:
@@ -274,11 +421,15 @@ class bullet(pygame.sprite.Sprite):
             #90 RIGHT, -90 LEFT
 
             range=[0.9,1,1.1,1.2,1.3]
-            self.diagonal=math.cos(math.radians(self.degreeofbullet))*self.velocity
+            self.diagonal=math.cos(math.radians(self.degreeofbullet))* math.pow(self.velocity,10)
             self.vertical=math.sqrt(math.pow(self.velocity,2) - math.pow(self.diagonal,2))
-  
-            self.diagonal=-abs((1)+self.diagonal if self.degreeofbullet>180 else 1-self.diagonal) if self.degreeofbullet>180 or self.degreeofbullet<0 else (1-self.diagonal if self.degreeofbullet<90 else abs(1+self.diagonal))
-            self.vertical=-abs((1.1)-(self.vertical)) if self.degreeofbullet>90 else (random.choice(range[2:4]) if boss else 1.2)-self.vertical
+
+            self.diagonal=-abs((1)+self.diagonal if self.degreeofbullet>=180 else 1-self.diagonal) if self.degreeofbullet>=180 or self.degreeofbullet<=0 else (1-self.diagonal if self.degreeofbullet<=90 else abs(1+self.diagonal))
+            self.vertical=-abs((1)-(self.vertical)) if self.degreeofbullet>=100 else (random.choice(range[2:4]) if boss else 1)-self.vertical
+
+
+
+
 
 
         self.group=group
@@ -307,7 +458,7 @@ class bullet(pygame.sprite.Sprite):
                 enemy_count.damage(10)
             if self.selected=="High":
                 enemy_count.damage(20)
-            if self.selected=="aim":
+            if self.selected=="aim":   
                 enemy_count.damage(30 if not abilityselection.highcalibre else 50)
 
 
@@ -316,17 +467,19 @@ class bullet(pygame.sprite.Sprite):
     def bullet_get_rect(self):
         return self.rect
 
-from button_game import button
+from button_gamee import button_game
 
 
 
 
 from dead_menu import death
-ded=death(highscore,screen,button,replitbad,overall_sound,abilityselection,abilitydescription)
+ded=death(highscore,screen,replitbad,overall_sound,abilityselection,abilitydescription)
 
 
 bulletlist=[]
 bulletlistboss=[]
+emplist=[]
+shotgunlist=[]
 listofenimies=[]
 listoftempests=[]
 listofboss=[]
@@ -359,6 +512,9 @@ class player(pygame.sprite.Sprite):
         self.missiletick=0
         self.missilefirerate=self.collection[self.selected][4]
         self.bulletlist=bulletlist
+        self.emplist=emplist
+        self.shotgunlist=shotgunlist
+        self.emp_tick=0
 
         self.health=self.collection[self.selected][3] if  not abilityselection.advanced() else self.collection[self.selected][3]*1.1
 
@@ -373,6 +529,7 @@ class player(pygame.sprite.Sprite):
         self.iterative=0
 
         self.facing=360
+        self.facing_opposite=-180
 
         self.angle=[(360,f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Forward.png"),(270,f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Left.png"),(-180,f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Down.png"),(-270,f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Right.png")]
         self.constantx,self.constanty=0,0
@@ -390,6 +547,10 @@ class player(pygame.sprite.Sprite):
         self.rect=self.image.get_rect()
         self.rect.center=xx,yy
 
+        self.revive_count=0
+        self.revive_tick=0
+        self.revive_cap=1
+
 
     def damage(self,damagetook):
 
@@ -397,13 +558,7 @@ class player(pygame.sprite.Sprite):
     def evolver(self):
         self.selected+=1 if self.selected+1<len(self.collection) else 0
         abilityselection.collectedabilities=[]
-        abilityselection.AccelteratedShot=False
-        abilityselection.evolve=False
-        abilityselection.highcalibre=False
-        abilityselection.missilebarrage=False
-        abilityselection.propeller=False
-        abilityselection.thefatman=False
-        abilityselection.advancedairframe=False
+        abilityselection.reset()
 
         self.firerate=self.collection[self.selected][1]
 
@@ -430,6 +585,7 @@ class player(pygame.sprite.Sprite):
 
             abilityselection.randomthree()
             self.health=self.collection[self.selected][3] if not abilityselection.advanced() else self.collection[self.selected][3]*1.1
+            self.revive_tick=0
 
         blackbox_experience=pygame.Rect(10,2,screen.get_width()-16,24)
         experience_rectangle=pygame.Rect(12,4,(experience/self.nextlevel)*screen.get_width(),20)
@@ -446,6 +602,7 @@ class player(pygame.sprite.Sprite):
         return self.rect
 
     def view(self): # The looking aspect, even though we have calculations going on in this bit :D
+        global tick
         if abilityselection.evolve:
             abilityselection.evolve=False
             firstplane.evolver()
@@ -487,12 +644,27 @@ class player(pygame.sprite.Sprite):
         screen.blit(self.playerplane,(self.rect.x,self.rect.y)) #DRAWS PLANE
 
         e=self.missiletick%self.missilefirerate==0 and (abilityselection.missilebarrage or self.collection[self.selected][0]=="F35")
+
+        if abilityselection.emp and tick%100==0: # EMP
+
+            self.emplist.append(emp(self.rect.x+self.playerplane.get_width()//2,self.rect.y+self.playerplane.get_height()//2,self.facing))
+
+            if shop_contain.gunner_upgrade:
+                self.emplist.append(emp(self.rect.x+self.playerplane.get_width()//2,self.rect.y+self.playerplane.get_height()//2,self.facing_opposite))
+
+        if abilityselection.shotgun and tick%150==0:
+            self.shotgunlist.append(shotgun_shoot(self.rect.x+self.playerplane.get_width()//2,self.rect.y+self.playerplane.get_height()//2,self.facing))
+        
         if (pygame.key.get_pressed()[K_SPACE] and self.planetick%self.firerate==0 )and not(self.missiletick%self.missilefirerate==0 and abilityselection.missilebarrage):
             if not replitbad:
                 self.shoot.play()
 
             self.bulletlist.append(bullet(bullets,self.rect.x+self.playerplane.get_width()//2 -10 if self.selected==1 else self.rect.x+self.playerplane.get_width()//2,self.rect.y+self.playerplane.get_height()//2 - 10 if self.selected == 1 else self.rect.y+self.playerplane.get_height()//2,self.facing,False if not self.collection[self.selected][0]=="F35" else True,False))
-            if self.selected==1:
+
+
+            if shop_contain.gunner_upgrade and self.selected==1:
+                self.bulletlist.append(bullet(bullets,self.rect.centerx if self.selected==1 else self.rect.centerx,self.rect.centery if self.selected == 1 else self.rect.centery,self.facing,False if not self.collection[self.selected][0]=="F35" else True,False))
+            if self.selected==1 or shop_contain.gunner_upgrade:
                 if not replitbad:
                     self.shoot.play()
                 self.bulletlist.append(bullet(bullets,self.rect.x+self.playerplane.get_width()//2 +10,self.rect.y+self.playerplane.get_height()//2 +10,self.facing,False,False))
@@ -501,15 +673,40 @@ class player(pygame.sprite.Sprite):
         if e:
             self.missilefirerate=self.missilefirerate+1 if self.missilefirerate<=205 else 200
             self.bulletlist.append(bullet(bullets,random.randint(self.rect.x,self.rect.x+self.playerplane.get_width()//2 -10 )if self.selected==1 else random.randint(self.rect.x,self.rect.x+self.playerplane.get_width()//2),random.randint(self.rect.y,self.rect.y+self.playerplane.get_height()//2 - 10) if self.selected == 1 else random.randint(self.rect.y,self.rect.y+self.playerplane.get_height()//2),self.facing,True,False))
+
+
+
         if pygame.key.get_pressed()[K_SPACE]:
             self.planetick+=1
+
+
+
+
 
 
 
         else:
             self.planetick=0
         self.missiletick+=1
+        self.emp_tick+=1
 
+
+        if shop_contain.recovery_upgrade:
+            self.health= self.health+1 if self.health <= (self.collection[self.selected][3] if not abilityselection.advanced() else self.collection[self.selected][3]*1.1) else self.health
+
+        if abilityselection.kissoflife:
+            if self.revive_tick==0:
+                self.revive_count+=self.revive_cap
+            self.revive_tick+=1
+            if self.health<=0 and self.revive_count>=1:
+                self.health=self.collection[self.selected][3]*0.75 if  not abilityselection.advanced() else (self.collection[self.selected][3]*1.1)*0.75
+                abilityselection.reset()
+                self.revive_count-=1
+                listofenimies.clear()
+                if not replitbad:
+                    self.death_sound.play()
+                
+            print(self.revive_count)
 
 
         if self.health<=0:
@@ -518,6 +715,7 @@ class player(pygame.sprite.Sprite):
                     self.death_sound.play()
                 self.iterative+=1
             ded.message(highscore)
+        
 
 
 
@@ -546,16 +744,18 @@ class player(pygame.sprite.Sprite):
                             #self.facing-self.angle[number]
                             self.playerplane=pygame.image.load(self.angle[number][1])
                             self.facing=self.angle[number][0]
+                            self.facing_opposite=-180 if self.facing==360 else 360 if self.facing == -180 else 270 if self.facing==-270 else -270
                         move_by=(keys[1]*1.5 if keys[1]>=0 else -abs(keys[1]*1.5)) if shop_contain.fuel_upgrade else keys[1]
-                        
-                        
-                        
-                        
+
+
+
+
                         if keys[2]=="u": # if player is moving vertical
                             self.constanty+=move_by if self.least<=self.constanty+move_by and self.constanty+move_by <= self.maxx else 0
 
                         else: # if player is moving diagonal
                             self.constantx+=move_by if self.least<=self.constantx+move_by and self.constantx+move_by <= self.maxx else 0
+
 
 
     def positionx(self):
@@ -608,6 +808,11 @@ class round:
         self.explosionradius[3]+=1000
         self.bossalive=False
 
+        self.biplane_health=130 if not shop_contain.hardmode_upgrade else 200
+        self.tempest_health=500 if not shop_contain.hardmode_upgrade else 700
+        self.harrier_health=1500 if not shop_contain.hardmode_upgrade else 2000
+        self.beaufighter_health=10000 if not shop_contain.hardmode_upgrade else 15000
+
 
         if not replitbad:
 
@@ -615,8 +820,9 @@ class round:
             self.dead_enemy_sound.set_volume(overall_sound)
     def enemyorbossupdate(self,list):
         global highscore,experience
+
         for enemycountter in islice(list,0,self.max_enemiesonscreen):
-            if enemycountter.health_get():
+            if enemycountter.health > 0:
                 if enemycountter.getposx() and enemycountter.getposy():
                     enemycountter.view()
                 if not abilityselection.stillgetting() and list==listofenimies:
@@ -641,11 +847,11 @@ class round:
                 if not replitbad:
                     self.dead_enemy_sound.play()
                 highscore+=10
-                experience+=enemycountter.xpgain if not firstplane.selected<=3 else enemycountter.xpgain*6
+                experience+=(enemycountter.xpgain*3*1.25 if shop_contain.advanced_int_upgrade else enemycountter.xpgain*3 )if firstplane.selected<=3 else (enemycountter.xpgain*6*1.25 if shop_contain.advanced_int_upgrade else enemycountter.xpgain*6)
         for explosions in self.listexplosion:
 
             if self.tick<=explosions[2]:
-                screen.blit(self.explosion,(explosions[0],explosions[1]))
+                    screen.blit(self.explosion,(explosions[0],explosions[1]))
 
             else:
                 self.listexplosion.pop(self.listexplosion.index(explosions))
@@ -678,13 +884,13 @@ class round:
                 if self.round_count==10: # beaufighter boss
                     self.budget=0
                     listofenimies.clear()
-                    listofboss.append(enemy(enemies,screen.get_width()//4,screen.get_height()//4,bosscollection,10000,0,0,500,screen,firstplane,abilityselection,bulletlistboss,tick,bosscollection)) # group,xx,yy,collection,health,selected,xpgain,firewait
+                    listofboss.append(enemy(enemies,x-100,y,bosscollection,self.beaufighter_health,0,0,500,screen,firstplane,abilityselection,bulletlistboss,tick,bosscollection)) # group,xx,yy,collection,health,selected,xpgain,firewait
                     self.bossalive=True
                 if self.budget%30==0 and not self.bossalive: # harrier
-                    listofenimies.append((enemy(enemies,x-100,y,enemycollection,1500,2,50,None,screen,firstplane,abilityselection,bulletlistboss,tick,bosscollection)))
+                    listofenimies.append((enemy(enemies,x-100,y,enemycollection,self.harrier_health,2,50,None,screen,firstplane,abilityselection,bulletlistboss,tick,bosscollection)))
                     you_are_my_special=True
                 if self.budget%10==0 and not self.bossalive: # tempest 
-                    self.budget-=30
+
 
 
                     if sideortopside==0:
@@ -693,29 +899,29 @@ class round:
                     if sideortopside==1:
                         tempest_x=screen.get_width()//2+(random.randint(-screen.get_width()//2,screen.get_width()//2))
                         tempest_y=random.choice(self.listofspawnsy[0])-100
-                    listofenimies.append((enemy(enemies,tempest_x-100,tempest_y,enemycollection,500,1,20,None,screen,firstplane,abilityselection,bulletlistboss,tick,bosscollection)))
+                    listofenimies.append((enemy(enemies,tempest_x-100,tempest_y,enemycollection,self.tempest_health,1,20,None,screen,firstplane,abilityselection,bulletlistboss,tick,bosscollection)))
                     you_are_my_special=True
-                    self.budget-=10
+                    self.budget-=4
                 if self.budget!=0 and not you_are_my_special: #biplane
 
-                    listofenimies.append((enemy(enemies,x-100,y,enemycollection,130,0,10,None,screen,firstplane,abilityselection,bulletlistboss,tick,bosscollection)))
-                    self.budget-=1
-
-        for nuke in self.listofnuke:
-            if nuke.rect.y < screen.get_height():
-                nuke.update()
-            else:
-                nuke.explode()
-                self.listofnuke.pop(self.listofnuke.index(nuke))
-                self.timesince_detonation=tick
-                self.nuke_detonation=True
-                listofenimies.clear()
+                    listofenimies.append((enemy(enemies,x-100,y,enemycollection,self.biplane_health,0,10,None,screen,firstplane,abilityselection,bulletlistboss,tick,bosscollection)))
+                    self.budget-=2
+        if self.listofnuke:
+            for nuke in self.listofnuke:
+                if nuke.rect.y < screen.get_height():
+                    nuke.update()
+                else:
+                    nuke.explode()
+                    self.listofnuke.pop(self.listofnuke.index(nuke))
+                    self.timesince_detonation=tick
+                    self.nuke_detonation=True
+                    listofenimies.clear()
 
 
         if self.timesince_detonation+self.detonation_timer< tick:
                 self.nuke_detonation=False
 
-        for bullet in bulletlist:
+        for bullet in bulletlist: # NORMAL BULLET LOOP
 
             if bullet.x() and bullet.y():
 
@@ -730,13 +936,61 @@ class round:
             else:
                 bulletlist.pop(bulletlist.index(bullet))
 
+        #EMP LOOP
+        for emp in emplist:
+            if emp.kill:
+                emplist.pop(emplist.index(emp))
+            if 0<emp.rect.x<screen.get_width() and 0<emp.rect.y<screen.get_height():
+                emp.image_get()
+                for l in islice(listofenimies,0,self.max_enemiesonscreen):
+                    if emp.explosion:
+                        if l.rect.colliderect(emp.explosion_radius) and emp.explosion:
+                            l.zapped=True
+                            l.damage(1)
+                            self.zapp_wait=l.tick+200
+                    if l.rect.colliderect(emp.rect):
+                        emp.explosion=True
 
-        Round.enemyorbossupdate(listofenimies)
-        Round.enemyorbossupdate(listofboss)
+                        l.damage(1)
+                for boss in listofboss:
+                    if boss.rect.colliderect(emp.explosion_radius) and emp.explosion:
+                            boss.zapped=True
+                            self.zapp_wait=boss.tick+200
+                            boss.damage(1)
+                    if boss.rect.colliderect(emp.rect):
+                        emp.explosion=True
+                        boss.damage(1)
+            else:
+                emplist.pop(emplist.index(emp))
+        if abilityselection.shotgun:
+
+            for shot in shotgunlist:
+                if shot.reset_count>=1:
+                    shotgunlist.pop(shotgunlist.index(shot))
+
+                if 0<shot.rect.x<screen.get_width() and 0<shot.rect.y<screen.get_height():
+                    shot.image_get()
+                    for l in islice(listofenimies,0,self.max_enemiesonscreen):
+                        if l.rect.colliderect(shot.rect):
+                            l.damage(70)
+                    for boss in listofboss:
+                        if boss.rect.colliderect(shot.explosion_radius):
+                            boss.damage(70)
+
+                else:
+                    shotgunlist.pop(shotgunlist.index(shot))
+                
+
+        if listofenimies:
+            Round.enemyorbossupdate(listofenimies)
+        if listofboss:
+            Round.enemyorbossupdate(listofboss)
 
         if len(listofboss)==0:
 
             self.bossalive=False
+
+
         if self.tick%1500==0 and abilityselection.thefatman:
             from clouds_file import fatmannuke
             self.listofnuke.append(fatmannuke(firstplane.rect.x,firstplane.rect.y,firstplane.constantx,screen))
@@ -753,7 +1007,7 @@ class round:
 
 
 Round=round()
-p=paused(highscore,screen,abilityselection)
+p=paused(highscore,screen,abilityselection,replitbad,overall_sound)
 from clouds_file import backdrop
 while running:
     backdrop(tick,Round.nuke_detonation,screen,cloudsonscreen)
@@ -771,10 +1025,13 @@ while running:
                 abilityselection.selecting=True if abilityselection.selecting is False else False
                 pause=True if pause is False else False
 
-
+        if firstplane.health <=0 : 
+            ded.highscore_check(event)
 
         if not abilityselection.stillgetting():
             firstplane.mover(movement,event)
+
+    
 
 
 
@@ -794,6 +1051,8 @@ while running:
     if abilityselection.propeller:
         propel.image_get()
     if abilityselection.stillgetting():
+
+
          abilityselection.abilityscreen()
 
 
@@ -802,6 +1061,7 @@ while running:
 
     if pause:
         p.draw(highscore)
+        p.check()
     if tick%60==0:
         if timer_s==60:
 
@@ -814,10 +1074,10 @@ while running:
         timer_s+=1
 
     clock.tick(60)
+
     pygame.display.update()
 
 '''
 1.The battle bus
 2. boss AI
-
 '''

@@ -53,6 +53,9 @@ class enemy(pygame.sprite.Sprite):
         self.rect=self.image.get_rect()
         self.rect.center=xx,yy
 
+        self.zapped=False
+        self.zapp_wait=0
+
     def view(self):
         self.tick+=1
 
@@ -134,15 +137,18 @@ class enemy(pygame.sprite.Sprite):
             self.facingindex=2
 
 
-
-
-
+        if self.zapped:
+            self.constantx,self.constanty=0,0
+        if self.zapp_wait<self.tick:
+            self.zapped=False
+        
 
 
 
         if not self.abilityselection.stillgetting():
             self.x+=self.constantx
             self.y+=self.constanty
+        
 
 
         if self.rect.colliderect(self.firstplane.rect):

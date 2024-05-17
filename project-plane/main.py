@@ -6,6 +6,7 @@ import csv
 import pandas as pd
 
 
+
 projecticon=pygame.image.load("Planes/F22/F22-Facing-Forward.png")
 pygame.display.set_caption("project plane")
 pygame.display.set_icon(projecticon)
@@ -31,61 +32,6 @@ level = 0
 
 '''for buttons to type in, mainly used in the settings'''
 '''unless I use a drop down menu'''
-class write:
-    def __init__(self,xx,xy,content,word):
-        self.yx,self.yy=xx,xy
-        self.diff=content.get_width()
-        screen.blit(content,(xx,xy))
-        self.sfont = pygame.font.SysFont("arialblack", 40, bold=False)
-        self.words=word
-        self.context=self.sfont.render(self.words,True,(255,255,255))
-        self.rect=pygame.Rect((self.yx+self.diff,self.yy),(self.context.get_width() if self.context.get_width() > 100 else 100,44))
-
-
-    def text(self):  
-            self.rect=pygame.Rect((self.yx+self.diff,self.yy),(self.context.get_width() if self.context.get_width() > 100 else 100,44))
-
-            pygame.draw.rect(screen,(0,173,212),self.rect)
-
-            self.context=self.sfont.render(self.words,True,(255,255,255))
-            screen.blit(self.context,self.rect)
-
-    def writer(self,event,objective):
-
-        if event.type == pygame.KEYDOWN and self.rect.collidepoint(mouse):
-                if event.key == pygame.K_BACKSPACE:
-                    self.words=self.words[:-1]
-                elif event.key==pygame.K_RETURN:
-
-                    objective()
-                elif len(self.words)<=10:
-                    self.words+=  event.unicode
-    def change_res(self,event):
-             global x,y
-             #BIT THAT IS UNIQUE THE RESOLUTION
-             newx,newy='',''
-
-             change=False
-             for l in range(len(self.words)):
-                if self.words[l].lower() == 'x' and change is False:
-                    change = True
-                if self.words[l]=="x":
-                    continue
-                if not change:
-                    newx += str(self.words[l])
-                else:
-                    newy += str(self.words[l])
-             pygame.display.set_mode((int(newx),int(newy)),pygame.RESIZABLE)
-             x,y=int(newx),int(newy)
-
-
-    def change_movement(self,event):
-        global moveup,movedown,moveleft,moveright,movement
-        count=0
-        if event.key == pygame.K_RETURN:
-            for l in range(0,len(self.words),2):
-                movement[count]=self.words[l]
-                count+=1
 
 '''dropdown menu button, mainly used in settings menu and changing plane :D'''
 
@@ -183,6 +129,14 @@ class dropdown:
             movement[control]=[self.chosen[l],value[itterval],value[itterval+1]]
             l+=2
             itterval+=2
+    def change_potato(self):
+        keep_line=""
+        change_csv=open("shop_unlocked.csv","r").read().splitlines()
+        keep_line=f"{change_csv[0]}\n"
+        keep_line+=self.chosen
+        change_csv=open("shop_unlocked.csv","w")
+        change_csv.write(keep_line)
+        
 
 
 '''slider for sliding (mainly for volume :D)'''
@@ -263,7 +217,7 @@ class button:
 
     def text(self,x,y):
             self.x,self.y=x,y
-            self.rect=pygame.Rect((self.x,self.y), (self.content.get_width()+5,self.content.get_height()))
+            self.rect=pygame.Rect((self.x,self.y), (self.content.get_width()+10,self.content.get_height()+3))
 
             if self.rect.collidepoint(mouse): #0, 195, 237
                 pygame.draw.rect(screen,(0, 195, 237),self.rect)
@@ -290,7 +244,7 @@ class button:
                 pygame.draw.rect(screen,(0, 173, 212),self.rect)
 
             if pygame.display.get_init():
-                screen.blit(self.content,self.rect)
+                screen.blit(self.content,(self.rect.x+5,self.rect.y+3))
 
     def check(self,objective):
         global mouse
@@ -329,12 +283,14 @@ class shop_button:
         self.change=0
         self.cost_number=int(cost)
         self.cost=self.sfont.render(cost,True,(255,255,255))
+
         original=pygame.image.load("menu-item/coin.png")
         self.coin=pygame.transform.scale(original,(self.cost.get_height(),self.cost.get_height()))        
         self.placeholder=self.sfont.render("___________",True,(255,255,255))
         self.desc_get_text=description
         self.desc_text=[]
         self.coll=0
+        self.image_in_box=pygame.transform.scale(self.image,(self.rect.h,self.rect.h))
         
 
         
@@ -359,7 +315,7 @@ class shop_button:
         self.hovertick=0
     def description_newline_get(self):
         last_let_place=0
-        height=self.description.get_height()+5
+        height=self.description.get_height()+10
         self.desc_text.clear()
         word=0
         space=" "
@@ -420,7 +376,7 @@ class shop_button:
                 descimage=pygame.transform.scale_by(self.image,3)
                 screen.blit(descimage,(Shop.description_wall.centerx-descimage.get_width(),Shop.description_wall.y+self.content.get_height()+10))
                 for lines in self.desc_text:
-                    screen.blit(self.sfont.render(f"{lines[0]}",True,(255,255,255)),(self.text_box_description.x,lines[1]))
+                    screen.blit(self.sfont.render(f"{lines[0]}",True,(255,255,255)),(self.text_box_description.x,lines[1]+20))
 
 
 
@@ -436,8 +392,8 @@ class shop_button:
                 pygame.draw.rect(screen,self.colour_again,self.rect)
 
             if pygame.display.get_init() and self.image:
-                screen.blit(self.image,(self.rect.centerx-self.image.get_width(),self.rect.centery-self.image.get_height()))
-                screen.blit(self.content,(self.rect.x,self.rect.y+self.content.get_height()//1.75))
+                #screen.blit(self.image_in_box,(self.rect.centerx-self.image.get_width(),self.rect.centery-self.image.get_height()))
+                screen.blit(self.content,(self.rect.x,self.rect.y))
 
 
     def check(self,objective,position):
@@ -547,8 +503,10 @@ class shoop:
         coins_have=open("how_many_coins.csv","r").read().splitlines()
         for coin in coins_have:
             self.coins=coin
+            print(coin)
 
         self.cost=self.sfont.render(f"{self.coins}",True,self.white)
+        print(self.coins)
 
 
         global level
@@ -656,13 +614,34 @@ class highscore:
         #highscore(x,y).highscore_check()
 
     def figure(self):
+        num=[]
         high=open("highscore.csv","r").read().splitlines()
+        for lines in high:
+            lines=lines.split(",")
+            num.append((lines[0],lines[1]))
+        
+        iteration=0
+        
+        while iteration<=len(high): 
+            for number in range(1,len(num)-1):
+                temp=num[number][1]
+                
+                if number+1<=len(num):
+                    if int(num[number][1])>int(num[number+1][1]):
+                          temp=num[number+1]
+                          num[number+1]=num[number]
+                          num[number]=temp
+                          iteration-=1
+                iteration+=1
+                print(iteration)
+                print(num)
+                          
         r=0
-
-        for l in range(3):
+        num.reverse()
+        for l in range(4):
             r+=44
 
-            self.text=(f"{l+1}.   {str(high[l])}")
+            self.text=(f"{l+1}.   {str(num[l][0])},{str(num[l][1])}")
             self.hightext=self.sfont.render(self.text,True,self.white)
             self.max=self.hightext.get_width() if self.hightext.get_width()>self.max else self.max
             self.max_height=self.hightext.get_height() if self.hightext.get_height() > self.max_height else self.max_height
@@ -734,6 +713,7 @@ class setting:
     self.xy=self.sfont.render("resolution",True,self.white)
     self.movement=self.sfont.render("movement",True,self.white)
     self.volume_text=self.sfont.render("vol",True,self.white)
+    self.potato_text=self.sfont.render("Potato",True,self.white)
 
     self.xybackground = dropdown(10+self.volume_text.get_width()+180,0+(y*0.3),self.xy)
 
@@ -742,6 +722,7 @@ class setting:
     self.playbackground = button(10, 10, self.general)
     self.backbackground = button(screen.get_width()-(screen.get_width()),screen.get_height()-(screen.get_height()),self.back)
     self.volume_slider = slider(10,(screen.get_height()*0.3),self.volume_text)
+    self.potato_dropdown=dropdown(10,screen.get_height()*0.4,self.potato_text)
 
 
 
@@ -758,16 +739,19 @@ class setting:
     self.backbackground.text(screen.get_width()-(self.back.get_width())-15,screen.get_height()-(self.back.get_height())-15)
     self.xybackground.check(lambda:self.xybackground.drop("resolution_choice",lambda:self.xybackground.change_res()))
     self.movement_change.check(lambda:self.movement_change.drop("movement_choice",lambda:self.movement_change.change_control()))
+    self.potato_dropdown.check(lambda: self.potato_dropdown.drop("true_false_choice",self.potato_dropdown.change_potato()))
 
     self.xybackground.view()
     self.movement_change.view()
     self.volume_slider.view()
+    self.potato_dropdown.view()
 
 
   def settings_check(self,event):
     global level,active,x,y
 
     pygame.mouse.get_pos()
+    
 
 
     def general_change(): self.place="general"
@@ -806,6 +790,7 @@ class Menu:
       self.highscore_text = self.sfont.render("Highscore",True,self.white)
       self.quit = self.sfont.render("Quit", True, self.white)
       self.shop = self.sfont.render("Shop",True,self.white)
+      self.reset_text = self.sfont.render("Reset",True,self.white)
 
       self.buttonplacey = (screen.get_height() // 2)
       self.buttonplacex = (screen.get_width() // 2) - 50
@@ -817,8 +802,10 @@ class Menu:
       self.blocker2 = button((screen.get_width() // 2) -self.settings.get_width()//2, (screen.get_height() // 3) + (self.diff+5+self.play.get_height()),self.settings)  # settings
       self.highscore = button((screen.get_width() // 2) - self.highscore_text.get_width()//2,(screen.get_height() // 3) + (self.diff +self.settings.get_height()+10+self.play.get_height()) , self.highscore_text)
       self.blocker3 = button((screen.get_width() // 2)  - self.quit.get_width()//2, (screen.get_height() // 3)  + (self.diff+self.settings.get_height()+15+self.highscore_text.get_height()+self.play.get_height()),self.quit)  # quit
-      self.shopper = button((screen.get_width() // 2)  - self.shop.get_width()//2, (screen.get_height() // 3)  + (self.diff+self.settings.get_height()+20+self.highscore_text.get_height()+self.play.get_height())+self.quit.get_height(),self.shop)
-
+      if shop_contain.shop_status:
+          self.shopper = button((screen.get_width() // 2)  - self.shop.get_width()//2, (screen.get_height() // 3)  + (self.diff+self.settings.get_height()+20+self.highscore_text.get_height()+self.play.get_height())+self.quit.get_height(),self.shop)
+          self.reset = button(10,screen.get_height()-self.reset_text.get_height()-10,self.reset_text)
+        
   def menu_create(self):
 
       screen.fill(self.bgcolour)  # Fills background
@@ -833,8 +820,10 @@ class Menu:
       self.blocker2.text((screen.get_width() // 2) -self.settings.get_width()//2,( (screen.get_height() // 3) + (self.diff+5+self.play.get_height())))
       self.highscore.text((screen.get_width() // 2) - self.highscore_text.get_width()//2,((screen.get_height() // 3) + (self.diff +self.settings.get_height()+10+self.play.get_height())))
       self.blocker3.text((screen.get_width() // 2)  - self.quit.get_width()//2,( (screen.get_height() // 3)  + (self.diff+self.settings.get_height()+20+self.highscore_text.get_height()+self.play.get_height()+self.shop.get_height())))
-      self.shopper.text((screen.get_width() // 2)  - self.shop.get_width()//2, (screen.get_height() // 3)  + (self.diff+self.settings.get_height()+15+self.highscore_text.get_height()+self.play.get_height()))
-
+      if shop_contain.shop_status:
+        self.shopper.text((screen.get_width() // 2)  - self.shop.get_width()//2, (screen.get_height() // 3)  + (self.diff+self.settings.get_height()+15+self.highscore_text.get_height()+self.play.get_height()))
+        self.reset.text(10,screen.get_height()-self.reset_text.get_height()-10)
+      
       screen.blit(self.name, (self.buttonplacex - self.name.get_width()//2, self.buttonplacey - (screen.get_height()*self.diff*3)))
   def play_game(self):
 
@@ -845,6 +834,15 @@ class Menu:
       settings_file.close()
       pygame.display.quit()
       os.system("python project-plane/game.py")
+  def clear_progress(self):
+    with open("how_many_coins.csv","w") as coin:
+        coin.write("0")
+    reset_gotten=open("shop_gotten.csv","w")
+    reset_gotten.truncate()
+    replace=""
+    for lines in shop_contain.shop:
+        replace+="False\n"
+    reset_gotten.write(str(replace))
 
 
 
@@ -856,8 +854,10 @@ class Menu:
 
       self.highscore.check(lambda: highscore(screen.get_width(),screen.get_height()).highscore_create()) 
       self.blocker3.check(lambda: pygame.quit())
-      self.shopper.check(lambda : shoop().shop_create())
-
+      if shop_contain.shop_status:
+          self.shopper.check(lambda : shoop().shop_create())
+          self.reset.check(lambda: Menu().clear_progress())
+    
 #main running section
 Shop=shoop()
 menu = Menu()
@@ -904,13 +904,18 @@ while running:
     pygame.display.update()
 
 '''to do list
-1. redo menu, doesn't work as intended and could look better
-2. more settings e.g. potato PC mode
-3. Find an good font to use to make the game feel unique
-4. PLEASE MAKE THE GAME EFFICIENT FOR MY BAD CHROMEBOOK
+1. redo menu, doesn't work as intended and could look better (tick, slightly)
+2. more settings e.g. potato PC mode ( tick, doesn't work sometimes though)
+3. Find an good font to use to make the game feel unique ( tick )
+4. PLEASE MAKE THE GAME EFFICIENT FOR MY BAD CHROMEBOOK ( idk it started working better on repl)
 
 5. ambient of falling while in the main menu
 6. engine sounds for the playerplane
 7. pause menu while playing the game (tick)
-8. 
+8. "add in dificulyty setting" - Harry
+9. "Add fix gramma to this" - Harry
+10. "SoundTrack" - Harry
+11. add a EMP that disruts enemy movement - Kleidi
+12. Have cooldown for proppeller dispersion on early planes
+13. have upgrades as a choice when entering, choose between 5
 '''
