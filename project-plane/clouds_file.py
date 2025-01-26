@@ -1,12 +1,24 @@
 import pygame,random
 class cloud:
-    def __init__(self,y,least,most,screen,cloudsonscreen) -> None:
+    def __init__(self,y,least,most,screen,cloudsonscreen,star) -> None:
         self.screen=screen
         self.cloudsonscreen=cloudsonscreen
-
-        self.cloud=pygame.image.load(f"Clouds/cloud-{random.randint(least,most)}.png")
+        random_chance=random.randint(1,1000)
+        if not star:
+            self.cloud=pygame.image.load(f"Clouds/cloud-{random.randint(least,most)}.png")
+        
+        if star and random_chance!=10:
+            
+            randomnum=random.randint(least,most)
+            self.cloud=pygame.image.load(f"Stars/star-{randomnum}.png")
+            if randomnum==3 or randomnum==4:
+                self.cloud=pygame.transform.scale_by(self.cloud,3)
+            else:
+                self.cloud=pygame.transform.scale_by(self.cloud,1.5)
         self.cloud_positionx=0-self.cloud.get_width()
         self.cloud_positiony=y
+        if random_chance==10:
+            self.cloud=pygame.image.load("battlebus.png")
 
 
     def update(self):
@@ -24,12 +36,17 @@ class cloud:
 fade=[0,166,201]
 nuke_tint=[224, 151, 16]
 
-def backdrop(tick,nuke,screen,cloudsonscreen):
+def backdrop(tick,nuke,screen,cloudsonscreen,stage):
         global fade,nuke_tint
         tick+=1
 
-        if not nuke:
+        if not nuke and stage=="E":
             screen.fill((0, 166, 201))
+        
+            fade=[0,166,201]
+        if not nuke and stage=="S":
+            screen.fill((0, 41, 54))
+
             fade=[0,166,201]
         else:
             if fade[0]<nuke_tint[0]:
@@ -40,10 +57,11 @@ def backdrop(tick,nuke,screen,cloudsonscreen):
                 fade[2]-=1
 
             screen.fill((fade[0],fade[1],fade[2]))
-        if tick%50==0:
-            cloudsonscreen.append(cloud(random.randint(0,screen.get_height()),1,2,screen,cloudsonscreen))
+        if tick%50==0 if stage!="S" else tick%25==0:
+            cloudsonscreen.append(cloud(random.randint(0,screen.get_height()),1,2,screen,cloudsonscreen,False if stage!="S" else True))
         if tick%500==0:
-            cloudsonscreen.append(cloud(random.randint(0,screen.get_height()),3,4,screen,cloudsonscreen))
+            
+            cloudsonscreen.append(cloud(random.randint(0,screen.get_height()),3,4,screen,cloudsonscreen,False if stage!="S" else True))
         for theclouds in cloudsonscreen:
             if theclouds.get_x():
                 theclouds.update()

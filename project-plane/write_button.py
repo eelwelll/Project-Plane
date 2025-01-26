@@ -36,8 +36,8 @@ class write:
                 if event.key == pygame.K_BACKSPACE:
                     self.words = self.words[:-1]
                 elif event.key == pygame.K_RETURN:
-    
-                    objective()
+                    if objective:
+                        objective()
                 elif len(self.words) <= 10:
                     self.words += event.unicode
 

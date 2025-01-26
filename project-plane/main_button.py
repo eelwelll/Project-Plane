@@ -22,11 +22,12 @@ class button:
         self.replitbad=replitbad
         self.overallsound=overall_sound
         self.screen=screen
-        
 
 
-    def text(self,x,y):
+
+    def text(self,x,y,content):
             self.x,self.y=x,y
+            self.content=content
             self.rect=pygame.Rect((self.x,self.y), (self.content.get_width()+5,self.content.get_height()))
             mouse=pygame.mouse.get_pos()
             if self.rect.collidepoint(mouse): #0, 195, 237
@@ -57,12 +58,12 @@ class button:
                 self.screen.blit(self.content,self.rect)
 
     def check(self,objective):
-  
+
         mouse=pygame.mouse.get_pos()
         #update it hopefully
 
-        self.rect=pygame.Rect((self.x,self.y), (self.content.get_width(),44))
-        
+        self.rect=pygame.Rect((self.x,self.y), (self.content.get_width(),self.content.get_height()))
+
         if pygame.mouse.get_pressed()[0] and objective and self.rect.collidepoint(mouse):
                     if not self.replitbad:
                         self.selected.play()
