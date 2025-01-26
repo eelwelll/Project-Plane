@@ -866,9 +866,6 @@ class player(pygame.sprite.Sprite):
         self.playerplane = pygame.image.load(
             f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Forward.png"
         )  #Planes/F22/project-plane-icon.png
-        self.shadow_change_by=0.25
-        self.player_shadow=pygame.transform.scale(pygame.image.load(f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Shadow.png"),(self.playerplane.get_width()-self.shadow_change_by,self.playerplane.get_height()-self.shadow_change_by))
-        self.player_shadow_black_ver=pygame.transform.scale(pygame.image.load(f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-complete_shadow.png"),(self.playerplane.get_width()-self.shadow_change_by,self.playerplane.get_height()-self.shadow_change_by))
 
         self.player_shadow=pygame.transform.flip(self.player_shadow,True,False)
         self.maxx = self.collection[self.selected][2]
@@ -1065,8 +1062,7 @@ class player(pygame.sprite.Sprite):
         '''for it to update and draw we need these two, along with the group that it is in, which will be a single group since we only want one player'''
         self.group.update()
         #self.group.draw(screen) # DRAWS BLACK BOX AROUND PLANE
-        #screen.blit(self.player_shadow_black_ver,(self.rect.x+self.playerplane.get_width()//30,self.rect.y+self.playerplane.get_height()//6))
-        #screen.blit(self.player_shadow,(self.rect.x+self.playerplane.get_width()//50,self.rect.y+self.playerplane.get_height()//10))
+
         screen.blit(self.playerplane, (self.rect.x, self.rect.y))  #DRAWS PLANE
         e = self.missiletick % self.missilefirerate == 0 and (
             abilityselection.missilebarrage
@@ -1224,11 +1220,7 @@ class player(pygame.sprite.Sprite):
                         self.playerplane = pygame.image.load(
                             self.angle[number][1])
                         self.facing = self.angle[number][0]
-                        self.facing_opposite = -180 if self.facing == 360 else 360 if self.facing == -180 else 270 if self.facing == -270 else -270
-                        self.player_shadow=pygame.transform.rotate(pygame.transform.scale(pygame.image.load(f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Shadow.png"),(self.playerplane.get_width()-self.shadow_change_by,self.playerplane.get_height()-self.shadow_change_by)),self.angle[number][0])
-                        self.player_shadow=pygame.transform.flip(self.player_shadow,True,False)
-                        self.player_shadow_black_ver=pygame.transform.rotate(pygame.transform.scale(pygame.image.load(f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-complete_shadow.png"),(self.playerplane.get_width()-self.shadow_change_by,self.playerplane.get_height()-self.shadow_change_by)),self.angle[number][0])
-                        self.player_shadow_black_ver=pygame.transform.flip(self.player_shadow_black_ver,True,False)                        
+                        self.facing_opposite = -180 if self.facing == 360 else 360 if self.facing == -180 else 270 if self.facing == -270 else -270                   
                     move_by = (keys[1] *
                                1.5 if keys[1] >= 0 else -abs(keys[1] * 1.5)
                                ) if shop_contain.fuel_upgrade else keys[1]
