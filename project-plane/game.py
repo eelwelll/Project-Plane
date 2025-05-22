@@ -867,7 +867,6 @@ class player(pygame.sprite.Sprite):
             f"Planes/{self.collection[self.selected][0]}/{self.collection[self.selected][0]}-Facing-Forward.png"
         )  #Planes/F22/project-plane-icon.png
 
-        self.player_shadow=pygame.transform.flip(self.player_shadow,True,False)
         self.maxx = self.collection[self.selected][2]
         self.least = -abs(self.maxx)
         self.last_moveby = 0
